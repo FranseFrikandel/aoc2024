@@ -15,17 +15,17 @@ fn main() {
         }
 
         else if line.len() > 1 {
-            let line_arr = line_to_array(&line);
+            let mut line_arr = line_to_array(&line);
             if check_line_rule(&line_arr, &rules) {
                 // Valid ordering
                 ordered_mid_pages.push(line_arr[line_arr.len()/2]);
             } else {
                 // Invalid ordering
-                let mut fixed_line_arr = fix_line(line_arr, &rules);
-                while !check_line_rule(&fixed_line_arr, &rules) {
-                    fixed_line_arr = fix_line(fixed_line_arr, &rules);
+                fix_line(&mut line_arr, &rules);
+                while !check_line_rule(&line_arr, &rules) {
+                    fix_line(&mut line_arr, &rules);
                 }
-                unordered_mid_pages.push(fixed_line_arr[fixed_line_arr.len()/2]);
+                unordered_mid_pages.push(line_arr[line_arr.len()/2]);
             }
         }
     }
@@ -57,8 +57,8 @@ fn line_to_array(line: &str) -> Vec<usize> {
     return vec;
 }
 
-fn fix_line(vector: Vec<usize>, rules: &Vec<Vec<usize>>) -> Vec<usize> {
-    let mut vector = vector.clone();
+fn fix_line(vector: &mut Vec<usize>, rules: &Vec<Vec<usize>>) {
+    // let mut vector = vector.clone();
     for i in 0..vector.len() {
         for rule in rules {
             if rule[1] == vector[i] && vector[i..].contains(&rule[0]) {
@@ -68,5 +68,4 @@ fn fix_line(vector: Vec<usize>, rules: &Vec<Vec<usize>>) -> Vec<usize> {
             }
         }
     }
-    return vector
 }
