@@ -1,16 +1,19 @@
-use std::fs::{read, read_to_string};
+use std::fs::{read_to_string};
+use std::time::Instant;
 
 fn main() {
+    let timer = Instant::now();
+
     // Read file
-    let mut position;
-    let mut travel_dir;
+    let position;
+    let travel_dir;
     let mut obstructions;
     (position, travel_dir, obstructions) = read_file();
 
     // run
     let mut is_loop: bool;
     let travelled_path: Vec<Vec<bool>>;
-    (is_loop, travelled_path) = run_path(&obstructions, position, travel_dir);
+    (_, travelled_path) = run_path(&obstructions, position, travel_dir);
 
     let mut base_sum: usize = 0;
     for i in travelled_path {
@@ -18,15 +21,13 @@ fn main() {
             if j {base_sum += 1};
         }
     }
-    println!("The length of base path is: {base_sum}");
+    println!("The length of base path is: {}", base_sum);
 
     // run w/ obstructions
     let mut loop_sum: usize = 0;
     for i in 0..obstructions.len() {
         for j in 0..obstructions[i].len() {
             if !obstructions[i][j] {
-                // println!("{}, {}", j, i);
-
                 obstructions[i][j] = true;
                 (is_loop, _) = run_path(&obstructions, position, travel_dir);
                 obstructions[i][j] = false;
@@ -36,7 +37,8 @@ fn main() {
             }
         }
     }
-    println!("The amount of possible loops is: {loop_sum}");
+    println!("The amount of possible loops is: {}", loop_sum);
+    println!("The total runtime was: {:.3?}", timer.elapsed())
 }
 
 fn read_file() -> ([isize; 2], usize, Vec<Vec<bool>>) {
@@ -111,9 +113,6 @@ fn run_path(obstructions: &Vec<Vec<bool>>, start_position: [isize; 2], start_tra
         }
 
         // We're back in a place and direction we've already been, we're in a loop.
-        // (since we're only tracking the last direction we've travelled over a place, I think there's an edge case
-        // where a loop isn't detected, but that probably won't be an issue)
-        // In case it does: should use 4 seperate bits to denote travelled directions instead of a 0-3 index.
         if travelled_points[next_pos[0]][next_pos[1]] && (travelled_dir[next_pos[0]][next_pos[1]] & (1 << travel_dir)) != 0 {
             return (true, travelled_points);
         }
