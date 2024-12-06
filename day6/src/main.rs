@@ -16,9 +16,9 @@ fn main() {
     (_, travelled_path) = run_path(&obstructions, position, travel_dir);
 
     let mut base_sum: usize = 0;
-    for i in travelled_path {
+    for i in &travelled_path {
         for j in i {
-            if j {base_sum += 1};
+            if *j {base_sum += 1};
         }
     }
     println!("The length of base path is: {}", base_sum);
@@ -27,7 +27,7 @@ fn main() {
     let mut loop_sum: usize = 0;
     for i in 0..obstructions.len() {
         for j in 0..obstructions[i].len() {
-            if !obstructions[i][j] {
+            if !obstructions[i][j] && travelled_path[i][j] {
                 obstructions[i][j] = true;
                 (is_loop, _) = run_path(&obstructions, position, travel_dir);
                 obstructions[i][j] = false;
