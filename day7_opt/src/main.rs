@@ -28,19 +28,19 @@ fn calculate(params: &[usize], res: usize) -> Vec<usize> {
     } else {
         let param = params.last().expect("Failed to retrieve last item");
         let results = calculate(&params[0..params.len()-1], res);
-        for res in results {
-            let sum = param + res;
-            // if sum <= res {
+        for result in results {
+            let sum = param + result;
+            if sum <= res {
                 possible_res.push(sum);
-            // }
-            let mult = param * res;
-            // if mult <= res {
+            }
+            let mult = param * result;
+            if mult <= res {
                 possible_res.push(mult);
-            // }
-            let concat = (res.to_string() + &param.to_string()).parse().expect("Failed to concat");
-            // if concat <= res {
+            }
+            let concat = (result.to_string() + &param.to_string()).parse().expect("Failed to concat");
+            if concat <= res {
                 possible_res.push(concat);
-            // }
+            }
         }
     }
     return possible_res;
