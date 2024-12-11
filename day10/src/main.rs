@@ -18,11 +18,11 @@ fn main() {
     for y in 0..map.len() {
         for x in 0..map[y].len() {
             if map[y][x] == 0 {
-                let mut final_points = search_points(y, x, 0, &map);
+                let mut final_points = search(y, x, 0, &map);
+                sum_rated += final_points.len();
                 final_points.sort();
                 final_points.dedup();
                 sum_points += final_points.len();
-                sum_rated += search_rated(y, x, 0, &map);
             }
         }
     }
@@ -32,7 +32,7 @@ fn main() {
     println!("Total runtime: {:.3?}", timer.elapsed());
 }
 
-fn search_points(y: usize, x: usize, cur_height: u8, map: &Vec<Vec<u8>>) -> Vec<[usize; 2]> {
+fn search(y: usize, x: usize, cur_height: u8, map: &Vec<Vec<u8>>) -> Vec<[usize; 2]> {
     if cur_height == 9 {
         return vec![[y, x]];
     }
@@ -41,7 +41,7 @@ fn search_points(y: usize, x: usize, cur_height: u8, map: &Vec<Vec<u8>>) -> Vec<
 
     match get_2d(y, x+1, &map) {
         Some(height) => if height == (cur_height + 1) {
-            let result = search_points(y, x+1, cur_height + 1, &map);
+            let result = search(y, x+1, cur_height + 1, &map);
             for res in result {
                 final_points.push(res);
             }
@@ -50,7 +50,7 @@ fn search_points(y: usize, x: usize, cur_height: u8, map: &Vec<Vec<u8>>) -> Vec<
     }
     match get_2d(y+1, x, &map) {
         Some(height) => if height == (cur_height + 1) {
-            let result = search_points(y+1, x, cur_height + 1, &map);
+            let result = search(y+1, x, cur_height + 1, &map);
             for res in result {
                 final_points.push(res);
             }
@@ -60,7 +60,7 @@ fn search_points(y: usize, x: usize, cur_height: u8, map: &Vec<Vec<u8>>) -> Vec<
     if x > 0 {
         match get_2d(y, x-1, &map) {
             Some(height) => if height == (cur_height + 1) {
-                let result = search_points(y, x-1, cur_height + 1, &map);
+                let result = search(y, x-1, cur_height + 1, &map);
                 for res in result {
                     final_points.push(res);
                 }
@@ -71,7 +71,7 @@ fn search_points(y: usize, x: usize, cur_height: u8, map: &Vec<Vec<u8>>) -> Vec<
     if y > 0 {
         match get_2d(y-1, x, &map) {
             Some(height) => if height == (cur_height + 1) {
-                let result = search_points(y-1, x, cur_height + 1, &map);
+                let result = search(y-1, x, cur_height + 1, &map);
                 for res in result {
                     final_points.push(res);
                 }
@@ -80,44 +80,6 @@ fn search_points(y: usize, x: usize, cur_height: u8, map: &Vec<Vec<u8>>) -> Vec<
         }
     }
     return final_points;
-}
-
-fn search_rated(y: usize, x: usize, cur_height: u8, map: &Vec<Vec<u8>>) -> usize {
-    if cur_height == 9 {
-        return 1;
-    }
-
-    let mut rating = 0;
-
-    match get_2d(y, x+1, &map) {
-        Some(height) => if height == (cur_height + 1) {
-            rating += search_rated(y, x+1, cur_height + 1, &map);
-        }
-        None => {}
-    }
-    match get_2d(y+1, x, &map) {
-        Some(height) => if height == (cur_height + 1) {
-            rating += search_rated(y+1, x, cur_height + 1, &map);
-        }
-        None => {}
-    }
-    if x > 0 {
-        match get_2d(y, x-1, &map) {
-            Some(height) => if height == (cur_height + 1) {
-                rating += search_rated(y, x-1, cur_height + 1, &map);
-            }
-            None => {}
-        }
-    }
-    if y > 0 {
-        match get_2d(y-1, x, &map) {
-            Some(height) => if height == (cur_height + 1) {
-                rating += search_rated(y-1, x, cur_height + 1, &map);
-            }
-            None => {}
-        }
-    }
-    return rating;
 }
 
 fn get_2d(y: usize, x:usize, vector: &Vec<Vec<u8>>) -> Option<u8> {
