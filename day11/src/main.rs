@@ -1,65 +1,56 @@
 use std::time::Instant;
 use std::fs::read_to_string;
-use std::collections::HashMap;
 use intmap::IntMap;
 
 fn main() {
     let timer = Instant::now();
 
-    let mut stones: Vec<usize> = Vec::new();
+    // Number on stone, amount of stones.
+    let mut stones: IntMap<usize, usize> = IntMap::new();
     // Cache saves after how many iterations some initial stone splits into some other set of stones.
     // Cache data format: [iterations, a, b]
-    let mut cache = IntMap::<usize, [usize; 3]>::default();
-    // let mut cache = HashMap::<usize, [usize; 3]>::default();
     for stone in read_to_string("input.txt").unwrap().split(" ") {
-        stones.push(stone.parse().expect("Failed to parse to int"));
+        let stone_int = stone.parse().expect("Failed to parse int");
+        add_stones(&mut stones, stone_int, 1);
+    }
+
+    for i in 0..75 {
+        let mut new_stones: IntMap<usize, usize> = IntMap::new();
+        for (stone, amount) in stones.iter_mut() {
+            if stone == 0 {
+                add_stones(&mut new_stones, 1, *amount);
+                continue;
+            }
+
+            let stone_str = stone.to_string();
+            let length = stone_str.len();
+            if length % 2 == 0 {
+                let a = stone_str[0..length/2].parse().expect("Failed to parse int");
+                let b = stone_str[length/2..length].parse().expect("Failed to parse int");
+                add_stones(&mut new_stones, a, *amount);
+                add_stones(&mut new_stones, b, *amount);
+                continue;
+            }
+
+            add_stones(&mut new_stones, stone*2024, *amount);
+        }
+        // println!("{}", i);
+        // println!("{}: {:?}", i, new_stones);
+        stones = new_stones;
     }
 
     let mut sum = 0;
-    for stone in stones {
-        sum += process_stone(stone, 26, &mut cache);
-        println!("Processed a stone: {}", sum);
-        println!("Runtime: {:.3?}", timer.elapsed());
+    for val in stones.values() {
+        sum += val;
     }
+
     println!("Amount of stones is: {}", sum);
     println!("Total runtime: {:.3?}", timer.elapsed());
 }
 
-fn process_stone(init_stone: usize, init_iterations: usize, cache: &mut IntMap<usize, [usize; 3]>) -> usize {
-    let mut stone = init_stone;
-    let mut iterations = init_iterations;
-    loop {
-        iterations -= 1;
-        match cache.get(stone) {
-            Some(&cache_hit) => if cache_hit[0] < iterations {
-                // We've found a longer chain, cache it too.
-                if stone != init_stone {
-                    cache.insert(init_stone, [init_iterations - iterations + cache_hit[0], cache_hit[1], cache_hit[2]]);
-                }
-                // println!("Cache hit");
-                let sum_a = process_stone(cache_hit[1], iterations - cache_hit[0] + 1, cache);
-                let sum_b = process_stone(cache_hit[2], iterations - cache_hit[0] + 1, cache);
-                return sum_a + sum_b;
-            },
-            None => {}
-        }
-        if iterations == 0 {
-            return 1;
-        }
-        if stone == 0 {
-            stone = 1;
-            continue;
-        }
-        let stone_str = stone.to_string();
-        if stone_str.len() % 2 == 0 {
-            let a = stone_str[0..stone_str.len()/2].parse().expect("Failed to parse to int");
-            let b = stone_str[stone_str.len()/2..stone_str.len()].parse().expect("Failed to parse to int");
-            // Cache the result
-            cache.insert(init_stone, [init_iterations - iterations, a, b]);
-            let sum_a = process_stone(a, iterations, cache);
-            let sum_b = process_stone(b, iterations, cache);
-            return sum_a+sum_b;
-        }
-        stone = stone*2024;
+fn add_stones(stonemap: &mut IntMap<usize, usize>, stone_id: usize, stone_amount: usize) {
+    match stonemap.get_mut(stone_id) {
+        Some(val) => {*val += stone_amount;},
+        None => {stonemap.insert(stone_id, stone_amount);}
     }
 }
