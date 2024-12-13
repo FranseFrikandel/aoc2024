@@ -39,7 +39,7 @@ fn main() {
 
         // println!("{}", max_a);
 
-        for a in 0..max_a {
+        for a in 0..max_a+1 {
             let x = a * machine[0][0];
             let y = a * machine[0][1];
             // There is some amount of B button presses that gets us to the prize on X-axis
