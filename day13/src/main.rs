@@ -32,12 +32,8 @@ fn main() {
     
     let mut p1_sum = 0;
     for machine in machines {
-        // Searchspace: presses on A, presses on B
-        // Current best match: presses on A, presses on B, cost
         let mut cur_match: Option<[usize; 3]> = None;
         let max_a = cmp::min(machine[2][0] / machine[0][0], machine[2][1] / machine[0][1]);
-
-        // println!("{}", max_a);
 
         for a in 0..max_a+1 {
             let x = a * machine[0][0];
@@ -61,7 +57,6 @@ fn main() {
     }
 
     println!("Total part 1 cost: {}", p1_sum);
-    // println!("Total part 2 cost: {}", p2_sum);
     println!("Total runtime: {:.3?}", timer.elapsed());
 }
 
