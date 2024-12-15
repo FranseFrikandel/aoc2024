@@ -21,14 +21,10 @@ fn main() {
         let vx: isize = robot_reg[3].parse().expect("Failed to parse to int");
         let vy: isize = robot_reg[4].parse().expect("Failed to parse to int");
 
-        let mut final_x = x + vx*time;
-        let final_x_offset = final_x / width;
-        final_x = final_x - (width * final_x_offset);
+        let mut final_x = (x + vx*time)%width;
         if final_x < 0 {final_x += width};
     
-        let mut final_y = y + vy*time;
-        let final_y_offset = final_y / height;
-        final_y = final_y - (height * final_y_offset);
+        let mut final_y = (y + vy*time)%height;
         if final_y < 0 {final_y += height };
 
         robots.push([final_x, final_y]);
