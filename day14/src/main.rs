@@ -2,7 +2,6 @@ use std::fs::read_to_string;
 use std::time::Instant;
 use regex::Regex;
 use std::io::stdin;
-use std::io::Read;
 
 fn main() {
     let timer = Instant::now();
@@ -45,6 +44,7 @@ fn main() {
     loop {
         println!("Input {}", i);
         let result = get_positions(&robots, i, width, height);
+        show_picture(&result, width, height);
         stdin().read_line(&mut _l).unwrap();
         i += 1;
     }
@@ -61,4 +61,22 @@ fn get_positions(robots: &Vec<[isize; 4]>, time:isize, width: isize, height: isi
         result.push([final_x, final_y]);
     }
     return result;
+}
+
+fn show_picture(robots: &Vec<[isize;2]>, width: isize, height: isize) {
+    let w_buffer = vec![false; width as usize];
+    let mut buffer = vec![w_buffer.clone(); height as usize];
+
+    for robot in robots {
+        buffer[robot[1] as usize][robot[0] as usize] = true;
+    }
+
+    for buffer_line in buffer {
+        let mut line_str = String::new();
+        for var in buffer_line {
+            if var {line_str.push('+')}
+            else {line_str.push('.')}
+        }
+        println!("{}", line_str);
+    }
 }

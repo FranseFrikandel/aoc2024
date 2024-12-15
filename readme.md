@@ -32,3 +32,9 @@ build.
 
 With culling the results that have already exceeded the wanted result early (after fixing a silly bug with naming 2 
 variables the same), runtimes are approx. 2.8 seconds for debug and 850ms for release. 
+
+## Day 14
+
+Day 14 p1 was, at least in my opinion, fairly simple compared to the past few days. However part 2 I haven't solved.
+I've manually made images of the robots and looked through the first ~300 images, however it seems the results are 
+looping, however I haven't seen a christmas tree.
