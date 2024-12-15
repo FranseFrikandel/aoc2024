@@ -1,7 +1,8 @@
 use std::fs::read_to_string;
 use std::time::Instant;
 use regex::Regex;
-
+use std::io::stdin;
+use std::io::Read;
 
 fn main() {
     let timer = Instant::now();
@@ -13,7 +14,7 @@ fn main() {
     let half_height = height/2;
     let reg = Regex::new(r"p=([-\d]+),([-\d]+) v=([-\d]+),([-\d]+)").unwrap();
 
-    let mut robots: Vec<[isize;2]> = Vec::new();
+    let mut robots: Vec<[isize;4]> = Vec::new();
     for line in read_to_string("input.txt").unwrap().lines() {
         let robot_reg = reg.captures(line).expect("Failed to parse regex");
         let x: isize = robot_reg[1].parse().expect("Failed to parse to int");
@@ -21,19 +22,16 @@ fn main() {
         let vx: isize = robot_reg[3].parse().expect("Failed to parse to int");
         let vy: isize = robot_reg[4].parse().expect("Failed to parse to int");
 
-        let mut final_x = (x + vx*time)%width;
-        if final_x < 0 {final_x += width};
-    
-        let mut final_y = (y + vy*time)%height;
-        if final_y < 0 {final_y += height };
-
-        robots.push([final_x, final_y]);
+        robots.push([x, y, vx, vy]);
     }
+
+    let p1_result = get_positions(&robots, time, width, height);
+
     let mut q1=0;
     let mut q2=0;
     let mut q3=0;
     let mut q4=0;
-    for robot in robots {
+    for robot in p1_result {
         if robot[0] < half_width && robot[1] < half_height { q1 += 1; }
         if robot[0] > half_width && robot[1] < half_height { q2 += 1; }
         if robot[0] < half_width && robot[1] > half_height { q3 += 1; }
@@ -41,4 +39,26 @@ fn main() {
     }
     println!("Result: {}", q1*q2*q3*q4);
     println!("Total runtime: {:.3?}", timer.elapsed());
+
+    let mut i = 0;
+    let mut _l = String::new();
+    loop {
+        println!("Input {}", i);
+        let result = get_positions(&robots, i, width, height);
+        stdin().read_line(&mut _l).unwrap();
+        i += 1;
+    }
+}
+
+fn get_positions(robots: &Vec<[isize; 4]>, time:isize, width: isize, height: isize) -> Vec<[isize; 2]> {
+    let mut result: Vec<[isize; 2]> = Vec::new();
+    for robot in robots {
+        let mut final_x = (robot[0] + robot[2]*time)%width;
+        if final_x < 0 {final_x += width};
+
+        let mut final_y = (robot[1] + robot[3]*time)%height;
+        if final_y < 0 {final_y += height };
+        result.push([final_x, final_y]);
+    }
+    return result;
 }
