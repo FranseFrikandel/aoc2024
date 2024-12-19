@@ -41,7 +41,7 @@ fn main() {
             map.push(map_line);
         } else {
             // Add to planned movements
-            // 0 = up, 1 = left, 2 = down, 3 = right
+            // 0 = up, 1 = right, 2 = down, 3 = left
             for ch in line.chars() {
                 match ch {
                     '^' => movements.push(0),
