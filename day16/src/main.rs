@@ -1,7 +1,7 @@
 use std::time::Instant;
 use std::fs::read_to_string;
 use std::vec::Vec;
-use std::collections::VecDeque;
+use std::collections::{VecDeque, HashMap, HashSet};
 
 fn main() {
     let timer = Instant::now();
@@ -11,7 +11,9 @@ fn main() {
     // Position, dir, cost
     // 0 = up, 1 = right, 2 = down, 3 = left
     let mut paths: VecDeque<([usize; 2], u8, usize, Vec<[usize; 2]>)> = VecDeque::new();
-    let mut final_path: Option<([usize; 2], u8, usize, Vec<[usize; 2]>)> = None;
+    let mut final_paths: Vec<([usize; 2], u8, usize, Vec<[usize; 2]>)> = Vec::new();
+    let mut min_score: Option<usize> = None;
+    let mut visited: HashMap<usize, usize> = HashMap::new();
 
     for line in read_to_string("input.txt").unwrap().lines() {
         // Add to the map
@@ -41,18 +43,13 @@ fn main() {
     }
 
     while let Some(cur_path) = paths.pop_front() {
-        if let Some(final_p) = &final_path {
+        if let Some(score) = min_score {
             // Cull path if the best path so far is better
-            if cur_path.2 > final_p.2 {
-                // println!("Culling path");
-                // let mut final_route_map = map.clone();
-                // for point in cur_path.3.iter() {
-                //     final_route_map[point[0]][point[1]] = 4
-                // }
-                // print_map(&final_route_map);
+            if cur_path.2 > score {
                 continue;
             }
         }
+
         let dirs: [u8; 3];
         if cur_path.1 == 0 {
             dirs = [3, 0, 1];
@@ -64,40 +61,51 @@ fn main() {
 
         for dir in dirs {
             let pos = get_pos_w_dir(cur_path.0, dir);
-            if cur_path.3.contains(&pos) {
-                // Loop
+            let key = pos_to_key(pos, dir);
+            let cost;
+            if cur_path.1 == dir {
+                cost = cur_path.2 + 1;
+            } else {
+                cost = cur_path.2 + 1001;
+            }
+
+            // Already visited the node with lower cost
+            if visited.get(&key).unwrap_or(&usize::MAX) < &cost {
                 continue;
             }
+
             if map[pos[0]][pos[1]] == 0 {
                 let mut pos_hist = cur_path.3.clone();
                 pos_hist.push(pos);
-                if cur_path.1 == dir {
-                    paths.push_back((pos, dir, cur_path.2 + 1, pos_hist));
-                } else {
-                    paths.push_back((pos, dir, cur_path.2 + 1001, pos_hist));
-                }
+                paths.push_back((pos, dir, cost, pos_hist));
+                visited.insert(key, cost);
             } else if map[pos[0]][pos[1]] == 2 {
-                if cur_path.1 == dir {
-                    if final_path == None || final_path.clone().unwrap().2 > cur_path.2 + 1 {
-                        final_path = Some((pos, dir, cur_path.2 + 1, cur_path.3.clone()));
-                    }
-                } else {
-                    if final_path == None || final_path.clone().unwrap().2 > cur_path.2 + 1001 {
-                        final_path = Some((pos, dir, cur_path.2 + 1001, cur_path.3.clone()));
-                    }
+                if min_score == None || min_score >= Some(cost) {
+                    let pos_hist = cur_path.3.clone();
+                    min_score = Some(cost);
+                    final_paths.push((pos, dir, cost, pos_hist));
                 }
             }
         }
+
+        paths.make_contiguous().sort_by(|a, b| a.2.cmp(&b.2));
     }
 
-    if let Some(final_p) = &final_path {
-        let mut final_route_map = map.clone();
-        for point in final_p.3.iter() {
-            final_route_map[point[0]][point[1]] = 4
+    let mut travelled_points = HashSet::new();
+    for path in final_paths {
+        if path.2 != min_score.expect("") {
+            continue;
         }
-        print_map(&final_route_map);
-        println!("Total cost: {}", final_p.2);
+        for point in path.3 {
+            travelled_points.insert(point);
+        }
     }
+
+    if let Some(score) = min_score {
+        println!("Minimum score: {}", score);
+    }
+    // Add 2 to add start and end point
+    println!("Total travelled places: {}", travelled_points.len() + 2);
     println!("Total runtime: {:.3?}", timer.elapsed());
 }
 
@@ -109,6 +117,10 @@ fn get_pos_w_dir(start: [usize; 2], dir: u8) -> [usize; 2] {
         3 => return [start[0], start[1]-1],
         4_u8..=u8::MAX => panic!()
     }
+}
+
+fn pos_to_key(pos: [usize; 2], dir:u8) -> usize {
+    return (pos[0] << 32) + (pos[1] << 4) + (dir as usize);
 }
 
 fn print_map(map: &Vec<Vec<u8>>) {
