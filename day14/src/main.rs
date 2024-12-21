@@ -42,9 +42,15 @@ fn main() {
     let mut i = 0;
     let mut _l = String::new();
     loop {
+        let mut img;
+        loop {
+            i += 1;
+            let result = get_positions(&robots, i, width, height);
+            img = generate_picture(&result, width, height);
+            if img.contains("++++++++") {break};
+        }
         println!("Input {}", i);
-        let result = get_positions(&robots, i, width, height);
-        show_picture(&result, width, height);
+        println!("{}", img);
         stdin().read_line(&mut _l).unwrap();
         i += 1;
     }
@@ -63,9 +69,10 @@ fn get_positions(robots: &Vec<[isize; 4]>, time:isize, width: isize, height: isi
     return result;
 }
 
-fn show_picture(robots: &Vec<[isize;2]>, width: isize, height: isize) {
+fn generate_picture(robots: &Vec<[isize;2]>, width: isize, height: isize) -> String {
     let w_buffer = vec![false; width as usize];
     let mut buffer = vec![w_buffer.clone(); height as usize];
+    let mut res_str = String::new();
 
     for robot in robots {
         buffer[robot[1] as usize][robot[0] as usize] = true;
@@ -77,6 +84,8 @@ fn show_picture(robots: &Vec<[isize;2]>, width: isize, height: isize) {
             if var {line_str.push('+')}
             else {line_str.push('.')}
         }
-        println!("{}", line_str);
+        res_str += &line_str;
+        res_str += "\n";
     }
+    return res_str;
 }
